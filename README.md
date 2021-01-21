@@ -104,3 +104,37 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 }
 ```
+
+
+### ItemTouchHelper Callbacks
+To implement behaviour such as swipe to delete and press and hold to move an item, you need to create an ItemTouchHelper object that handles the behaviour. It containts two required methods, onSwiped() and onMove(). The complexity of the functionality you want to implement when these methods are called will dictate whether you are able to use a SimpleCallBack or if you have to use a the standard CallBack.  
+
+#### Swipe Behaviour
+The following is an example of swipe to delete. The SimpleCallBack parameter enums that reference the direction that you want the action to occur (swipe left and/or right, drag up and/or down). Swipe to delete logic is quite simple to implement once you have created your ItemTouchHelper. You need to remove the item from the array (dictated by the row that is being interacted with) and then notify the adapater that there has been changes. ViewHolder.getAdapaterPosition() will get the position of the item that is being interacted with. NotifyDataSetChanged() is self explanatory.
+
+```
+    ItemTouchHelper.SimpleCallback itemTouchHelperCallBack = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT) {
+        @Override
+        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+            return false;
+        }
+
+        @Override
+        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+            mNames.remove(viewHolder.getAdapterPosition());
+            mImageUrls.remove(viewHolder.getAdapterPosition());
+            recyclerViewAdapter.notifyDataSetChanged();
+        }
+    };
+```
+
+The step that is easy to forget is actually attaching the ItemTouchHelper to the recyclerView:
+
+```
+    private void setupRecyclerView() {
+        //Setup logic
+        ...
+        //Attach ItemTouchHelper
+        new ItemTouchHelper((itemTouchHelperCallBack)).attachToRecyclerView(recyclerView);
+    }
+```
