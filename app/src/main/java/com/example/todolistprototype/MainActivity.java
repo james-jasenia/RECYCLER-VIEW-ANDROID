@@ -1,6 +1,8 @@
 package com.example.todolistprototype;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -15,7 +17,8 @@ public class MainActivity extends AppCompatActivity {
     //Properties
     private ArrayList<String> mNames = new ArrayList<String>();
     private ArrayList<String> mImageUrls = new ArrayList<String>();
-
+    RecyclerView recyclerView;
+    RecyclerViewAdapter recyclerViewAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,9 +59,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView() {
-        RecyclerView recyclerView = findViewById(R.id.recycler_view);
-        RecyclerViewAdapter adapter = new RecyclerViewAdapter(mNames, mImageUrls, this);
-        recyclerView.setAdapter(adapter);
+        recyclerView = findViewById(R.id.recycler_view);
+        recyclerViewAdapter = new RecyclerViewAdapter(mNames, mImageUrls, this);
+        recyclerView.setAdapter(recyclerViewAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        //Attaching the callback object to the recycler view
+        new ItemTouchHelper((itemTouchHelperCallBack)).attachToRecyclerView(recyclerView);
     }
+
+    //Swipe to delete
+    //SimpleCallback(0, ItemTouchHelper.RIGHT) -> The parameters are for what behaviour you want.
+    ItemTouchHelper.SimpleCallback itemTouchHelperCallBack = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT) {
+        @Override
+        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+            return false;
+        }
+
+        @Override
+        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+            mNames.remove(viewHolder.getAdapterPosition());
+            mImageUrls.remove(viewHolder.getAdapterPosition());
+            recyclerViewAdapter.notifyDataSetChanged();
+        }
+    };
 }
